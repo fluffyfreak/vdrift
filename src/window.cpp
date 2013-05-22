@@ -80,10 +80,6 @@ void WINDOW_SDL::Init(
 	SDL_WM_SetCaption(windowcaption.c_str(), NULL);
 #endif
 
-	LogOpenGLInfo(info_output);
-
-	initialized = true;
-
 	// initialize GLEW
 	GLenum glew_err = glewInit();
 	if (glew_err != GLEW_OK)
@@ -95,7 +91,10 @@ void WINDOW_SDL::Init(
 	else
 	{
 		info_output << "Using GLEW " << glewGetString(GLEW_VERSION) << std::endl;
+		initialized = true;
 	}
+	
+	LogOpenGLInfo(info_output);
 }
 
 void WINDOW_SDL::SwapBuffers()
@@ -206,7 +205,6 @@ void WINDOW_SDL::ChangeDisplay(
 	std::ostream & info_output,
 	std::ostream & error_output)
 {
-
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, dbpp);
 

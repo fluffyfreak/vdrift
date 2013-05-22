@@ -251,8 +251,12 @@ bool GRAPHICS_GL2::Init(
 	fsaa = 1;
 	if (antialiasing > 1)
 		fsaa = antialiasing;
-
-	if (!GLEW_ARB_multitexture)
+	
+	if (!shaders)
+	{
+		DisableShaders(shaderpath, error_output);
+	}
+	else if (!GLEW_ARB_multitexture)
 	{
 		info_output << "Your video card doesn't support multitexturing.  Disabling shaders." << std::endl;
 		DisableShaders(shaderpath, error_output);

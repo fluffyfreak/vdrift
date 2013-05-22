@@ -153,25 +153,32 @@ void MODEL::GenerateListID(std::ostream & error_output)
 
 	ClearListID();
 	listid = glGenLists(1);
+	GLUTIL::CheckForOpenGLErrors("MODEL::GenerateListID gen list", error_output);
 
 	const int * faces;
 	const float * verts;
 	const float * norms;
-	const float * tc[1];
+	const float * tcoord;
 	int facecount;
 	int vertcount;
 	int normcount;
-	int tccount[1];
+	int tccount;
 
 	m_mesh.GetFaces(faces, facecount);
 	m_mesh.GetVertices(verts, vertcount);
 	m_mesh.GetNormals(norms, normcount);
-	m_mesh.GetTexCoords(0, tc[0], tccount[0]);
+	m_mesh.GetTexCoords(0, tcoord, tccount);
 
 	assert(facecount > 0);
 	assert(vertcount > 0);
 	assert(normcount > 0);
-	assert (tccount[0] > 0);
+	assert(tccount > 0);
+	
+	// mesa vertex attribute segfault fix
+	GLint n = 0;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &n);
+	for (GLint i = 0; i < n; ++i)
+		glDisableVertexAttribArray(i);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
@@ -179,8 +186,8 @@ void MODEL::GenerateListID(std::ostream & error_output)
 
 	glVertexPointer(3, GL_FLOAT, 0, verts);
 	glNormalPointer(GL_FLOAT, 0, norms);
-	glTexCoordPointer(2, GL_FLOAT, 0, tc[0]);
-
+	glTexCoordPointer(2, GL_FLOAT, 0, tcoord);
+	
 	glNewList(listid, GL_COMPILE);
 	glDrawElements(GL_TRIANGLES, facecount, GL_UNSIGNED_INT, faces);
 	glEndList();
@@ -189,7 +196,7 @@ void MODEL::GenerateListID(std::ostream & error_output)
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
-	GLUTIL::CheckForOpenGLErrors("model list ID generation", error_output);
+	GLUTIL::CheckForOpenGLErrors("MODEL::GenerateListID init list", error_output);
 }
 
 template <typename T>
